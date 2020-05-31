@@ -15,6 +15,8 @@ type Handler struct {
 func RouteList(apiGroup *gin.RouterGroup, handler *Handler) {
 	listApi := apiGroup.Group("/list")
 
+	listApi.GET("/", handler.GetList)
+
 	listApi.GET("/:id", handler.GetItem)
 
 	listApi.POST("/", handler.CreateItem)
@@ -22,6 +24,22 @@ func RouteList(apiGroup *gin.RouterGroup, handler *Handler) {
 	listApi.PUT("/", handler.UpdateItem)
 
 	listApi.DELETE("/:id", handler.DeleteItem)
+}
+
+func (h *Handler) GetList(context *gin.Context) {
+	isCompleted, err := strconv.ParseBool(context.DefaultQuery("completed", "false"))
+	if err != nil {
+		context.Status(http.StatusBadRequest)
+		return
+	}
+
+	actualList, err := h.ListService.GetList(isCompleted)
+	if err != nil {
+		context.Status(http.StatusInternalServerError) // todo error type
+		return
+	}
+
+	context.JSON(http.StatusOK, actualList)
 }
 
 func (h *Handler) GetItem(context *gin.Context) {

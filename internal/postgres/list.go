@@ -93,3 +93,40 @@ func (r *repository) Delete(id int64) error {
 
 	return nil
 }
+
+func (r *repository) FindByIsDone(isDone bool) ([]list.Item, error) {
+	query := `
+		select id, 
+			   description, 
+			   extract(epoch from duration)::integer, 
+			   is_done,
+			   weight
+		from list
+		where is_done = $1`
+
+	rows, err := r.db.Query(query, isDone)
+	if err != nil {
+		return nil, fmt.Errorf("can't find by is done: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]list.Item, 0)
+
+	for rows.Next() {
+		var i list.Item
+		err := rows.Scan(
+			&i.ID,
+			&i.Description,
+			&i.Duration,
+			&i.IsDone,
+			&i.Weight,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("can't find by is done: %w", err)
+		}
+
+		items = append(items, i)
+	}
+
+	return items, nil
+}

@@ -2,7 +2,7 @@ package list
 
 type Service interface {
 	AddNewItem(item Item) error
-	GetActualList() ([]Item, error)
+	GetList(isCompleted bool) ([]Item, error)
 	UpdateItem(item Item) error
 	GetItem(id int64) (Item, error)
 	DeleteItem(id int64) error
@@ -20,8 +20,8 @@ func (s *service) AddNewItem(item Item) error {
 	return s.repository.Insert(item)
 }
 
-func (s *service) GetActualList() ([]Item, error) {
-	panic("implement me")
+func (s *service) GetList(isCompleted bool) ([]Item, error) {
+	return s.repository.FindByIsDone(isCompleted)
 }
 
 func (s *service) UpdateItem(item Item) error {
