@@ -7,4 +7,5 @@ type Item struct {
 	Description string        `json:"description"`
 	Duration    time.Duration `json:"duration"`
 	IsDone      bool          `json:"is_done"`
+	Weight      int64         `json:"weight"`
 }

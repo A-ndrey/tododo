@@ -15,12 +15,13 @@ func NewListRepository(db *sql.DB) list.Repository {
 }
 
 func (r *repository) Insert(item list.Item) error {
-	query := `insert into list (description, duration, is_done) values ($1, $2, $3)`
+	query := `insert into list (description, duration, is_done, weight, created_at) values ($1, $2, $3, $4, now())`
 	_, err := r.db.Exec(
 		query,
 		item.Description,
 		item.Duration,
 		item.IsDone,
+		item.Weight,
 	)
 	if err != nil {
 		return fmt.Errorf("can't insert item: %w", err)
@@ -32,24 +33,47 @@ func (r *repository) Insert(item list.Item) error {
 func (r *repository) Find(id int64) (list.Item, error) {
 	var i list.Item
 
-	query := `select id, description, extract(epoch from duration)::integer, is_done from list where id = $1`
-	err := r.db.QueryRow(query, id).Scan(&i.ID, &i.Description, &i.Duration, &i.IsDone)
+	query := `
+		select id, 
+			   description, 
+			   extract(epoch from duration)::integer, 
+			   is_done,
+			   weight
+		from list 
+		where id = $1
+		  and deleted_at is null`
+
+	err := r.db.QueryRow(query, id).Scan(
+		&i.ID,
+		&i.Description,
+		&i.Duration,
+		&i.IsDone,
+		&i.Weight,
+	)
 	if err != nil {
-		fmt.Println(err)
-		return list.Item{}, fmt.Errorf("can't find item with id=%v: %w", id, err)
+		return list.Item{}, fmt.Errorf("can't find item: %w", err)
 	}
 
 	return i, nil
 }
 
 func (r *repository) Update(item list.Item) error {
-	query := `update list set description = $1, duration = $2, is_done = $3 where id = $4`
+	query := `
+		update list 
+		set description = $2,
+		    duration = $3,
+		    is_done = $4,
+		    weight = $5,
+		    updated_at = now()
+		where id = $1`
+
 	_, err := r.db.Exec(
 		query,
+		item.ID,
 		item.Description,
 		item.Duration,
 		item.IsDone,
-		item.ID,
+		item.Weight,
 	)
 
 	if err != nil {
@@ -60,5 +84,12 @@ func (r *repository) Update(item list.Item) error {
 }
 
 func (r *repository) Delete(id int64) error {
-	panic("implement me")
+	query := `update list set deleted_at = now() where id = $1`
+
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("can't delete item: %w", err)
+	}
+
+	return nil
 }
