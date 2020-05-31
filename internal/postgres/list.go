@@ -102,7 +102,8 @@ func (r *repository) FindByIsDone(isDone bool) ([]list.Item, error) {
 			   is_done,
 			   weight
 		from list
-		where is_done = $1`
+		where is_done = $1
+		  and deleted_at is null`
 
 	rows, err := r.db.Query(query, isDone)
 	if err != nil {
