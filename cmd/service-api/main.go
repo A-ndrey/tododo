@@ -2,12 +2,16 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/A-ndrey/tododo/cmd/service-api/handler"
+	"github.com/A-ndrey/tododo/internal/config"
+	_ "github.com/A-ndrey/tododo/internal/config"
 	"github.com/A-ndrey/tododo/internal/list"
 	"github.com/A-ndrey/tododo/internal/postgres"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -29,11 +33,24 @@ func main() {
 	listHandler := &handler.ListHandler{ListService: listService}
 	handler.RouteList(api, listHandler)
 
-	r.Run(":3000")
+	serverConf := config.GetServer()
+	addr := fmt.Sprintf("%s:%d", serverConf.Host, serverConf.Port)
+	http.ListenAndServe(addr, r)
 }
 
 func initLogger() {
-	logger, err := zap.NewDevelopment()
+	var createLogger func(options ...zap.Option) (*zap.Logger, error)
+
+	switch config.GetEnvironment() {
+	case "prod":
+		createLogger = zap.NewProduction
+	case "dev":
+		createLogger = zap.NewDevelopment
+	default:
+		log.Fatal("unknown environment")
+	}
+
+	logger, err := createLogger()
 	if err != nil {
 		log.Fatal("can't initialize logger")
 	}

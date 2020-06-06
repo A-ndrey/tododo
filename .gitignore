@@ -109,4 +109,6 @@ modules.xml
 # Sonarlint plugin
 .idea/sonarlint
 
+config.yaml
+
 # End of https://www.gitignore.io/api/go,intellij+all
