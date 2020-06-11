@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/A-ndrey/tododo/cmd/service-api/handler"
 	"github.com/A-ndrey/tododo/internal/config"
@@ -9,6 +8,7 @@ import (
 	"github.com/A-ndrey/tododo/internal/list"
 	"github.com/A-ndrey/tododo/internal/postgres"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
@@ -25,7 +25,7 @@ func main() {
 		}
 	}()
 
-	listRepo := postgres.NewListRepository(db)
+	listRepo := list.NewListRepository(db)
 	listService := list.NewService(listRepo)
 
 	r := gin.Default()
@@ -44,9 +44,9 @@ func initLogger() {
 	var createLogger func(options ...zap.Option) (*zap.Logger, error)
 
 	switch config.GetEnvironment() {
-	case "prod":
+	case config.ENV_PROD:
 		createLogger = zap.NewProduction
-	case "dev":
+	case config.ENV_DEV:
 		createLogger = zap.NewDevelopment
 	default:
 		log.Fatal("unknown environment")
@@ -60,16 +60,12 @@ func initLogger() {
 	zap.ReplaceGlobals(logger)
 }
 
-func initDB() *sql.DB {
+func initDB() *gorm.DB {
 	zap.S().Info("connecting to database...")
 
 	db, err := postgres.Connect()
 	if err != nil {
 		zap.S().Fatalf("can't connect to database: %v", err)
-	}
-
-	if err = db.Ping(); err != nil {
-		zap.S().Fatalf("can't ping database: %v", err)
 	}
 
 	zap.S().Info("successful connection to the database")

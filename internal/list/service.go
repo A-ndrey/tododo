@@ -4,8 +4,8 @@ type Service interface {
 	AddNewItem(item Item) error
 	GetList(isCompleted bool) ([]Item, error)
 	UpdateItem(item Item) error
-	GetItem(id int64) (Item, error)
-	DeleteItem(id int64) error
+	GetItem(id uint) (Item, error)
+	DeleteItem(id uint) error
 }
 
 type service struct {
@@ -28,10 +28,10 @@ func (s *service) UpdateItem(item Item) error {
 	return s.repository.Update(item)
 }
 
-func (s *service) GetItem(id int64) (Item, error) {
-	return s.repository.Find(id)
+func (s *service) GetItem(id uint) (Item, error) {
+	return s.repository.FindById(id)
 }
 
-func (s *service) DeleteItem(id int64) error {
+func (s *service) DeleteItem(id uint) error {
 	return s.repository.Delete(id)
 }

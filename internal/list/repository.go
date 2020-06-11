@@ -2,8 +2,8 @@ package list
 
 type Repository interface {
 	Insert(item Item) error
-	Find(id int64) (Item, error)
+	FindById(id uint) (Item, error)
 	Update(item Item) error
-	Delete(id int64) error
+	Delete(id uint) error
 	FindByIsDone(isDone bool) ([]Item, error)
 }

@@ -43,7 +43,7 @@ func (h *ListHandler) GetList(context *gin.Context) {
 }
 
 func (h *ListHandler) GetItem(context *gin.Context) {
-	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(context.Param("id"), 10, 64)
 	if err != nil {
 		zap.L().Warn("GetItem",
 			zap.Error(err),
@@ -52,10 +52,10 @@ func (h *ListHandler) GetItem(context *gin.Context) {
 		return
 	}
 
-	i, err := h.ListService.GetItem(id)
+	i, err := h.ListService.GetItem(uint(id))
 	if err != nil {
 		zap.L().Error("GetItem",
-			zap.Int64("id", id),
+			zap.Uint64("id", id),
 			zap.Error(err),
 		)
 		context.Status(http.StatusInternalServerError) // todo error type
@@ -114,7 +114,7 @@ func (h *ListHandler) UpdateItem(context *gin.Context) {
 }
 
 func (h *ListHandler) DeleteItem(context *gin.Context) {
-	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(context.Param("id"), 10, 64)
 	if err != nil {
 		zap.L().Warn("DeleteItem",
 			zap.Error(err),
@@ -123,10 +123,10 @@ func (h *ListHandler) DeleteItem(context *gin.Context) {
 		return
 	}
 
-	err = h.ListService.DeleteItem(id)
+	err = h.ListService.DeleteItem(uint(id))
 	if err != nil {
 		zap.L().Error("DeleteItem",
-			zap.Int64("id", id),
+			zap.Uint64("id", id),
 			zap.Error(err),
 		)
 		context.Status(http.StatusInternalServerError) // todo error type

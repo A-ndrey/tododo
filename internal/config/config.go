@@ -24,6 +24,11 @@ var c struct {
 	Server
 }
 
+const (
+	ENV_DEV  = "dev"
+	ENV_PROD = "prod"
+)
+
 func init() {
 	file, err := os.Open("config.yaml")
 	if err != nil {
