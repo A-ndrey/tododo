@@ -20,7 +20,9 @@ func main() {
 	db := initDB()
 	defer func() {
 		err := db.Close()
-		zap.S().Fatalf("can't close database connection: %v", err)
+		if err != nil {
+			zap.S().Fatalf("can't close database connection: %v", err)
+		}
 	}()
 
 	listRepo := postgres.NewListRepository(db)
