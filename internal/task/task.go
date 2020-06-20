@@ -1,10 +1,10 @@
-package list
+package task
 
 import (
 	"time"
 )
 
-type Item struct {
+type Task struct {
 	ID          uint64        `json:"id" gorm:"primary_key"`
 	Description string        `json:"description" gorm:"NOT NULL"`
 	Duration    time.Duration `json:"duration,omitempty"`

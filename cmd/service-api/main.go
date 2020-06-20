@@ -5,8 +5,8 @@ import (
 	"github.com/A-ndrey/tododo/cmd/service-api/handler"
 	"github.com/A-ndrey/tododo/internal/config"
 	_ "github.com/A-ndrey/tododo/internal/config"
-	"github.com/A-ndrey/tododo/internal/list"
 	"github.com/A-ndrey/tododo/internal/postgres"
+	"github.com/A-ndrey/tododo/internal/task"
 	"github.com/A-ndrey/tododo/internal/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -32,8 +32,8 @@ func main() {
 		}
 	}()
 
-	listRepo := list.NewRepository(db)
-	listService := list.NewService(listRepo)
+	listRepo := task.NewRepository(db)
+	listService := task.NewService(listRepo)
 
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo)

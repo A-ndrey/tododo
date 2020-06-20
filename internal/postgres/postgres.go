@@ -3,14 +3,14 @@ package postgres
 import (
 	"fmt"
 	"github.com/A-ndrey/tododo/internal/config"
-	"github.com/A-ndrey/tododo/internal/list"
+	"github.com/A-ndrey/tododo/internal/task"
 	"github.com/A-ndrey/tododo/internal/user"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 var entities = []interface{}{
-	&list.Item{},
+	&task.Task{},
 	&user.User{},
 }
 

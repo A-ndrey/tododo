@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/A-ndrey/tododo/internal/list"
+	"github.com/A-ndrey/tododo/internal/task"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -9,7 +9,7 @@ import (
 )
 
 type ListHandler struct {
-	ListService list.Service
+	ListService task.Service
 }
 
 func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler) {
@@ -17,13 +17,13 @@ func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler) {
 
 	listApi.GET("/", handler.GetList)
 
-	listApi.GET("/:id", handler.GetItem)
+	listApi.GET("/:id", handler.GetTask)
 
-	listApi.POST("/", handler.CreateItem)
+	listApi.POST("/", handler.CreateTask)
 
-	listApi.PUT("/", handler.UpdateItem)
+	listApi.PUT("/", handler.UpdateTask)
 
-	listApi.DELETE("/:id", handler.DeleteItem)
+	listApi.DELETE("/:id", handler.DeleteTask)
 }
 
 func (h *ListHandler) GetList(ctx *gin.Context) {
@@ -42,19 +42,19 @@ func (h *ListHandler) GetList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, actualList)
 }
 
-func (h *ListHandler) GetItem(ctx *gin.Context) {
+func (h *ListHandler) GetTask(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		zap.L().Warn("GetItem",
+		zap.L().Warn("GetTask",
 			zap.Error(err),
 		)
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	i, err := h.ListService.GetItem(id)
+	i, err := h.ListService.GetTask(id)
 	if err != nil {
-		zap.L().Error("GetItem",
+		zap.L().Error("GetTask",
 			zap.Uint64("id", id),
 			zap.Error(err),
 		)
@@ -65,21 +65,21 @@ func (h *ListHandler) GetItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, i)
 }
 
-func (h *ListHandler) CreateItem(ctx *gin.Context) {
-	var i list.Item
+func (h *ListHandler) CreateTask(ctx *gin.Context) {
+	var t task.Task
 
-	if err := ctx.BindJSON(&i); err != nil {
-		zap.L().Warn("CreateItem",
+	if err := ctx.BindJSON(&t); err != nil {
+		zap.L().Warn("CreateTask",
 			zap.Error(err),
 		)
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	err := h.ListService.AddNewItem(i)
+	err := h.ListService.AddNewTask(t)
 	if err != nil {
-		zap.L().Error("CreateItem",
-			zap.Reflect("item", i),
+		zap.L().Error("CreateTask",
+			zap.Reflect("task", t),
 			zap.Error(err),
 		)
 		ctx.Status(http.StatusInternalServerError)
@@ -89,21 +89,21 @@ func (h *ListHandler) CreateItem(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
-func (h *ListHandler) UpdateItem(ctx *gin.Context) {
-	var i list.Item
+func (h *ListHandler) UpdateTask(ctx *gin.Context) {
+	var t task.Task
 
-	if err := ctx.BindJSON(&i); err != nil {
-		zap.L().Warn("UpdateItem",
+	if err := ctx.BindJSON(&t); err != nil {
+		zap.L().Warn("UpdateTask",
 			zap.Error(err),
 		)
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	err := h.ListService.UpdateItem(i)
+	err := h.ListService.UpdateTask(t)
 	if err != nil {
-		zap.L().Error("UpdateItem",
-			zap.Reflect("item", i),
+		zap.L().Error("UpdateTask",
+			zap.Reflect("task", t),
 			zap.Error(err),
 		)
 		ctx.Status(http.StatusInternalServerError)
@@ -113,19 +113,19 @@ func (h *ListHandler) UpdateItem(ctx *gin.Context) {
 	ctx.Status(http.StatusOK)
 }
 
-func (h *ListHandler) DeleteItem(ctx *gin.Context) {
+func (h *ListHandler) DeleteTask(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
-		zap.L().Warn("DeleteItem",
+		zap.L().Warn("DeleteTask",
 			zap.Error(err),
 		)
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	err = h.ListService.DeleteItem(id)
+	err = h.ListService.DeleteTask(id)
 	if err != nil {
-		zap.L().Error("DeleteItem",
+		zap.L().Error("DeleteTask",
 			zap.Uint64("id", id),
 			zap.Error(err),
 		)
