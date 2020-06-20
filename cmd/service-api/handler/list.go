@@ -26,8 +26,8 @@ func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler) {
 	listApi.DELETE("/:id", handler.DeleteItem)
 }
 
-func (h *ListHandler) GetList(context *gin.Context) {
-	_, isCompleted := context.GetQuery("completed")
+func (h *ListHandler) GetList(ctx *gin.Context) {
+	_, isCompleted := ctx.GetQuery("completed")
 
 	actualList, err := h.ListService.GetList(isCompleted)
 	if err != nil {
@@ -35,44 +35,44 @@ func (h *ListHandler) GetList(context *gin.Context) {
 			zap.Bool("completed", isCompleted),
 			zap.Error(err),
 		)
-		context.Status(http.StatusInternalServerError) // todo error type
+		ctx.Status(http.StatusInternalServerError) // todo error type
 		return
 	}
 
-	context.JSON(http.StatusOK, actualList)
+	ctx.JSON(http.StatusOK, actualList)
 }
 
-func (h *ListHandler) GetItem(context *gin.Context) {
-	id, err := strconv.ParseUint(context.Param("id"), 10, 64)
+func (h *ListHandler) GetItem(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
 		zap.L().Warn("GetItem",
 			zap.Error(err),
 		)
-		context.Status(http.StatusBadRequest)
+		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	i, err := h.ListService.GetItem(uint(id))
+	i, err := h.ListService.GetItem(id)
 	if err != nil {
 		zap.L().Error("GetItem",
 			zap.Uint64("id", id),
 			zap.Error(err),
 		)
-		context.Status(http.StatusInternalServerError) // todo error type
+		ctx.Status(http.StatusInternalServerError) // todo error type
 		return
 	}
 
-	context.JSON(http.StatusOK, i)
+	ctx.JSON(http.StatusOK, i)
 }
 
-func (h *ListHandler) CreateItem(context *gin.Context) {
+func (h *ListHandler) CreateItem(ctx *gin.Context) {
 	var i list.Item
 
-	if err := context.BindJSON(&i); err != nil {
+	if err := ctx.BindJSON(&i); err != nil {
 		zap.L().Warn("CreateItem",
 			zap.Error(err),
 		)
-		context.Status(http.StatusBadRequest)
+		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
@@ -82,21 +82,21 @@ func (h *ListHandler) CreateItem(context *gin.Context) {
 			zap.Reflect("item", i),
 			zap.Error(err),
 		)
-		context.Status(http.StatusInternalServerError)
+		ctx.Status(http.StatusInternalServerError)
 		return
 	}
 
-	context.Status(http.StatusCreated)
+	ctx.Status(http.StatusCreated)
 }
 
-func (h *ListHandler) UpdateItem(context *gin.Context) {
+func (h *ListHandler) UpdateItem(ctx *gin.Context) {
 	var i list.Item
 
-	if err := context.BindJSON(&i); err != nil {
+	if err := ctx.BindJSON(&i); err != nil {
 		zap.L().Warn("UpdateItem",
 			zap.Error(err),
 		)
-		context.Status(http.StatusBadRequest)
+		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
@@ -106,32 +106,32 @@ func (h *ListHandler) UpdateItem(context *gin.Context) {
 			zap.Reflect("item", i),
 			zap.Error(err),
 		)
-		context.Status(http.StatusInternalServerError)
+		ctx.Status(http.StatusInternalServerError)
 		return
 	}
 
-	context.Status(http.StatusOK)
+	ctx.Status(http.StatusOK)
 }
 
-func (h *ListHandler) DeleteItem(context *gin.Context) {
-	id, err := strconv.ParseUint(context.Param("id"), 10, 64)
+func (h *ListHandler) DeleteItem(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
 		zap.L().Warn("DeleteItem",
 			zap.Error(err),
 		)
-		context.Status(http.StatusBadRequest)
+		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	err = h.ListService.DeleteItem(uint(id))
+	err = h.ListService.DeleteItem(id)
 	if err != nil {
 		zap.L().Error("DeleteItem",
 			zap.Uint64("id", id),
 			zap.Error(err),
 		)
-		context.Status(http.StatusInternalServerError) // todo error type
+		ctx.Status(http.StatusInternalServerError) // todo error type
 		return
 	}
 
-	context.Status(http.StatusOK)
+	ctx.Status(http.StatusOK)
 }

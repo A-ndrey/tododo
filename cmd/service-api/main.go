@@ -7,15 +7,22 @@ import (
 	_ "github.com/A-ndrey/tododo/internal/config"
 	"github.com/A-ndrey/tododo/internal/list"
 	"github.com/A-ndrey/tododo/internal/postgres"
+	"github.com/A-ndrey/tododo/internal/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	initLogger()
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		zap.S().Fatal("environment variable JWT_SECRET not set")
+	}
 
 	db := initDB()
 	defer func() {
@@ -25,8 +32,11 @@ func main() {
 		}
 	}()
 
-	listRepo := list.NewListRepository(db)
+	listRepo := list.NewRepository(db)
 	listService := list.NewService(listRepo)
+
+	userRepo := user.NewRepository(db)
+	userService := user.NewService(userRepo)
 
 	r := gin.Default()
 
@@ -34,6 +44,12 @@ func main() {
 
 	listHandler := &handler.ListHandler{ListService: listService}
 	handler.RouteList(api, listHandler)
+
+	authHandler := &handler.AuthHandler{
+		JWTSecret:   []byte(jwtSecret),
+		UserService: userService,
+	}
+	handler.RouteAuth(api, authHandler)
 
 	serverConf := config.GetServer()
 	addr := fmt.Sprintf("%s:%d", serverConf.Host, serverConf.Port)

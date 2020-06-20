@@ -9,7 +9,7 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewListRepository(db *gorm.DB) Repository {
+func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
@@ -22,7 +22,7 @@ func (r *repository) Insert(item Item) error {
 	return nil
 }
 
-func (r *repository) FindById(id uint) (Item, error) {
+func (r *repository) FindById(id uint64) (Item, error) {
 	var i Item
 
 	err := r.db.First(&i, id).Error
@@ -42,7 +42,7 @@ func (r *repository) Update(item Item) error {
 	return nil
 }
 
-func (r *repository) Delete(id uint) error {
+func (r *repository) Delete(id uint64) error {
 	err := r.db.Delete(Item{ID: id}).Error
 	if err != nil {
 		return fmt.Errorf("can't delete item: %w", err)
