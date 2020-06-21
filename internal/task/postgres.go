@@ -22,10 +22,10 @@ func (r *repository) Insert(task Task) error {
 	return nil
 }
 
-func (r *repository) FindById(id uint64) (Task, error) {
+func (r *repository) FindById(userId, taskId uint64) (Task, error) {
 	var t Task
 
-	err := r.db.First(&t, id).Error
+	err := r.db.Where(&Task{ID: taskId, UserId: userId}).First(&t).Error
 	if err != nil {
 		return Task{}, fmt.Errorf("can't find task: %w", err)
 	}
@@ -42,8 +42,8 @@ func (r *repository) Update(task Task) error {
 	return nil
 }
 
-func (r *repository) Delete(id uint64) error {
-	err := r.db.Delete(Task{ID: id}).Error
+func (r *repository) Delete(userId, taskId uint64) error {
+	err := r.db.Delete(Task{ID: taskId, UserId: userId}).Error
 	if err != nil {
 		return fmt.Errorf("can't delete task: %w", err)
 	}
@@ -51,10 +51,10 @@ func (r *repository) Delete(id uint64) error {
 	return nil
 }
 
-func (r *repository) FindByIsDone(isDone bool) ([]Task, error) {
+func (r *repository) FindByIsDone(userId uint64, isDone bool) ([]Task, error) {
 	tasks := make([]Task, 0)
 
-	err := r.db.Where(map[string]interface{}{"is_done": isDone}).Find(&tasks).Error
+	err := r.db.Where(map[string]interface{}{"is_done": isDone, "user_id": userId}).Find(&tasks).Error
 	if err != nil {
 		return nil, fmt.Errorf("can't find by is done: %w", err)
 	}

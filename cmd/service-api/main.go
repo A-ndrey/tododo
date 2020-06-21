@@ -43,13 +43,14 @@ func main() {
 	api := r.Group("/api/v1")
 
 	listHandler := &handler.ListHandler{ListService: listService}
-	handler.RouteList(api, listHandler)
 
 	authHandler := &handler.AuthHandler{
 		JWTSecret:   []byte(jwtSecret),
 		UserService: userService,
 	}
+
 	handler.RouteAuth(api, authHandler)
+	handler.RouteList(api, listHandler, authHandler.AuthMiddleware)
 
 	serverConf := config.GetServer()
 	addr := fmt.Sprintf("%s:%d", serverConf.Host, serverConf.Port)

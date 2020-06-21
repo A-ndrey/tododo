@@ -9,11 +9,12 @@ import (
 )
 
 type ListHandler struct {
+	AuthHandler
 	ListService task.Service
 }
 
-func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler) {
-	listApi := apiGroup.Group("/list")
+func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler, middleware ...gin.HandlerFunc) {
+	listApi := apiGroup.Group("/list", middleware...)
 
 	listApi.GET("/", handler.GetList)
 
@@ -29,7 +30,13 @@ func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler) {
 func (h *ListHandler) GetList(ctx *gin.Context) {
 	_, isCompleted := ctx.GetQuery("completed")
 
-	actualList, err := h.ListService.GetList(isCompleted)
+	userId, ok := getUserId(ctx)
+	if !ok {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	actualList, err := h.ListService.GetList(userId, isCompleted)
 	if err != nil {
 		zap.L().Error("GetList",
 			zap.Bool("completed", isCompleted),
@@ -52,7 +59,13 @@ func (h *ListHandler) GetTask(ctx *gin.Context) {
 		return
 	}
 
-	i, err := h.ListService.GetTask(id)
+	userId, ok := getUserId(ctx)
+	if !ok {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	i, err := h.ListService.GetTask(userId, id)
 	if err != nil {
 		zap.L().Error("GetTask",
 			zap.Uint64("id", id),
@@ -75,6 +88,14 @@ func (h *ListHandler) CreateTask(ctx *gin.Context) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
+
+	userId, ok := getUserId(ctx)
+	if !ok {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	t.UserId = userId
 
 	err := h.ListService.AddNewTask(t)
 	if err != nil {
@@ -100,6 +121,14 @@ func (h *ListHandler) UpdateTask(ctx *gin.Context) {
 		return
 	}
 
+	userId, ok := getUserId(ctx)
+	if !ok {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	t.UserId = userId
+
 	err := h.ListService.UpdateTask(t)
 	if err != nil {
 		zap.L().Error("UpdateTask",
@@ -123,7 +152,13 @@ func (h *ListHandler) DeleteTask(ctx *gin.Context) {
 		return
 	}
 
-	err = h.ListService.DeleteTask(id)
+	userId, ok := getUserId(ctx)
+	if !ok {
+		ctx.Status(http.StatusInternalServerError)
+		return
+	}
+
+	err = h.ListService.DeleteTask(userId, id)
 	if err != nil {
 		zap.L().Error("DeleteTask",
 			zap.Uint64("id", id),
@@ -134,4 +169,16 @@ func (h *ListHandler) DeleteTask(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusOK)
+}
+
+func getUserId(ctx *gin.Context) (uint64, bool) {
+	userIdRaw, ok := ctx.Get("userId")
+	if !ok {
+		zap.L().Error("User ID not specified",
+			zap.String("path", ctx.FullPath()),
+		)
+		return 0, false
+	}
+
+	return userIdRaw.(uint64), true
 }

@@ -1,13 +1,17 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/A-ndrey/tododo/internal/user"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
+	"strings"
 	"time"
 )
+
+const tokenDuration = 7 * 24 * time.Hour
 
 type AuthHandler struct {
 	JWTSecret   []byte
@@ -70,7 +74,7 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	claims := UserClaims{
 		UserId: userId,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: int64(7 * 24 * time.Hour),
+			ExpiresAt: time.Now().Add(tokenDuration).Unix(),
 		},
 	}
 
@@ -88,4 +92,37 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, struct {
 		Token string `json:"token"`
 	}{tokenString})
+}
+
+func (h *AuthHandler) AuthMiddleware(ctx *gin.Context) {
+	authHeader := ctx.GetHeader("Authorization")
+
+	prefix := "Bearer "
+
+	if !strings.HasPrefix(authHeader, prefix) {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	tokenString := authHeader[len(prefix):]
+
+	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return h.JWTSecret, nil
+	})
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	claims, ok := token.Claims.(*UserClaims)
+	if !ok || !token.Valid {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	ctx.Set("userId", claims.UserId)
 }
