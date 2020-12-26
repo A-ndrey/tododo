@@ -5,9 +5,12 @@ import (
 	"github.com/A-ndrey/tododo/internal/config"
 	"github.com/A-ndrey/tododo/internal/task"
 	"github.com/A-ndrey/tododo/internal/user"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
+
+const schemaName = "tododo"
 
 var entities = []interface{}{
 	&task.Task{},
@@ -16,17 +19,25 @@ var entities = []interface{}{
 
 func Connect() (*gorm.DB, error) {
 	conf := config.GetPostgres()
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", conf.User, conf.Password, conf.DBName, conf.SSLMode)
-	db, err := gorm.Open("postgres", connStr)
+
+	gcfg := gorm.Config{
+		NamingStrategy: schema.NamingStrategy{TablePrefix: schemaName + "."},
+	}
+
+	dsn := fmt.Sprintf("user=%s password=%s dbname=%s host=%s", conf.User, conf.Password, conf.DBName, conf.Host)
+	db, err := gorm.Open(postgres.Open(dsn), &gcfg)
 	if err != nil {
 		return nil, err
 	}
 
-	if config.GetEnvironment() == config.ENV_DEV {
-		db.DropTableIfExists(entities...)
+	result := db.Exec("create schema if not exists " + schemaName)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
-	db.AutoMigrate(entities...)
+	if err := db.AutoMigrate(entities...); err != nil {
+		return nil, err
+	}
 
 	return db, nil
 }

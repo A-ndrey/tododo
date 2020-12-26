@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/A-ndrey/tododo/cmd/service-api/handler"
 	"github.com/A-ndrey/tododo/internal/config"
@@ -9,11 +10,14 @@ import (
 	"github.com/A-ndrey/tododo/internal/task"
 	"github.com/A-ndrey/tododo/internal/user"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -25,12 +29,6 @@ func main() {
 	}
 
 	db := initDB()
-	defer func() {
-		err := db.Close()
-		if err != nil {
-			zap.S().Fatalf("can't close database connection: %v", err)
-		}
-	}()
 
 	listRepo := task.NewRepository(db)
 	listService := task.NewService(listRepo)
@@ -54,7 +52,28 @@ func main() {
 
 	serverConf := config.GetServer()
 	addr := fmt.Sprintf("%s:%d", serverConf.Host, serverConf.Port)
-	http.ListenAndServe(addr, r)
+
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: r,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			zap.S().Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		zap.S().Fatal("Server forced to shutdown:", err)
+	}
 }
 
 func initLogger() {

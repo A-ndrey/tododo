@@ -2,7 +2,7 @@ package task
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type repository struct {

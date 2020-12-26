@@ -11,7 +11,7 @@ type Postgres struct {
 	User     string
 	Password string
 	DBName   string
-	SSLMode  string
+	Host     string
 }
 type Server struct {
 	Host string
