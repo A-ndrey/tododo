@@ -9,14 +9,13 @@ import (
 )
 
 type ListHandler struct {
-	AuthHandler
 	ListService task.Service
 }
 
-func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler, middleware ...gin.HandlerFunc) {
-	listApi := apiGroup.Group("/list", middleware...)
+func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler) {
+	listApi := apiGroup.Group("/tasks")
 
-	listApi.GET("/", handler.GetList)
+	listApi.GET("/", handler.GetTasks)
 
 	listApi.GET("/:id", handler.GetTask)
 
@@ -27,7 +26,7 @@ func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler, middleware ...gi
 	listApi.DELETE("/:id", handler.DeleteTask)
 }
 
-func (h *ListHandler) GetList(ctx *gin.Context) {
+func (h *ListHandler) GetTasks(ctx *gin.Context) {
 	_, isCompleted := ctx.GetQuery("completed")
 
 	userId, ok := getUserId(ctx)
@@ -38,7 +37,7 @@ func (h *ListHandler) GetList(ctx *gin.Context) {
 
 	actualList, err := h.ListService.GetList(userId, isCompleted)
 	if err != nil {
-		zap.L().Error("GetList",
+		zap.L().Error("GetTasks",
 			zap.Bool("completed", isCompleted),
 			zap.Error(err),
 		)
@@ -172,7 +171,7 @@ func (h *ListHandler) DeleteTask(ctx *gin.Context) {
 }
 
 func getUserId(ctx *gin.Context) (uint64, bool) {
-	userIdRaw, ok := ctx.Get("userId")
+	userIdRaw, ok := ctx.Get(UserIDKey)
 	if !ok {
 		zap.L().Error("User ID not specified",
 			zap.String("path", ctx.FullPath()),

@@ -24,6 +24,11 @@ func (r *repository) FindByEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (r *repository) Insert(user User) error {
-	return r.db.Save(&user).Error
+func (r *repository) Insert(user User) (uint64, error) {
+	res := r.db.Save(&user)
+	if res.Error != nil {
+		return 0, res.Error
+	}
+
+	return user.ID, nil
 }

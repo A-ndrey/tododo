@@ -7,12 +7,20 @@ import (
 )
 
 type Environment string
+
 type Postgres struct {
 	User     string
 	Password string
 	DBName   string
 	Host     string
 }
+
+type Auth struct {
+	Service string
+	Host    string
+	Port    uint
+}
+
 type Server struct {
 	Host string
 	Port uint
@@ -21,6 +29,7 @@ type Server struct {
 var c struct {
 	Environment
 	Postgres
+	Auth
 	Server
 }
 
@@ -47,6 +56,10 @@ func GetEnvironment() Environment {
 
 func GetPostgres() Postgres {
 	return c.Postgres
+}
+
+func GetAuth() Auth {
+	return c.Auth
 }
 
 func GetServer() Server {

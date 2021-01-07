@@ -1,4 +1,4 @@
-package postgres
+package driver
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ var entities = []interface{}{
 	&user.User{},
 }
 
-func Connect() (*gorm.DB, error) {
+func NewPostgresGorm() (*gorm.DB, error) {
 	conf := config.GetPostgres()
 
 	gcfg := gorm.Config{

@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/A-ndrey/tododo/cmd/service-api/handler"
 	"github.com/A-ndrey/tododo/internal/config"
 	_ "github.com/A-ndrey/tododo/internal/config"
-	"github.com/A-ndrey/tododo/internal/postgres"
+	"github.com/A-ndrey/tododo/internal/driver"
+	"github.com/A-ndrey/tododo/internal/handler"
 	"github.com/A-ndrey/tododo/internal/task"
 	"github.com/A-ndrey/tododo/internal/user"
 	"github.com/gin-gonic/gin"
@@ -23,11 +23,6 @@ import (
 func main() {
 	initLogger()
 
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		zap.S().Fatal("environment variable JWT_SECRET not set")
-	}
-
 	db := initDB()
 
 	listRepo := task.NewRepository(db)
@@ -40,15 +35,11 @@ func main() {
 
 	api := r.Group("/api/v1")
 
+	api.Use(handler.AuthMiddleware(userService))
+
 	listHandler := &handler.ListHandler{ListService: listService}
 
-	authHandler := &handler.AuthHandler{
-		JWTSecret:   []byte(jwtSecret),
-		UserService: userService,
-	}
-
-	handler.RouteAuth(api, authHandler)
-	handler.RouteList(api, listHandler, authHandler.AuthMiddleware)
+	handler.RouteList(api, listHandler)
 
 	serverConf := config.GetServer()
 	addr := fmt.Sprintf("%s:%d", serverConf.Host, serverConf.Port)
@@ -99,7 +90,7 @@ func initLogger() {
 func initDB() *gorm.DB {
 	zap.S().Info("connecting to database...")
 
-	db, err := postgres.Connect()
+	db, err := driver.NewPostgresGorm()
 	if err != nil {
 		zap.S().Fatalf("can't connect to database: %v", err)
 	}

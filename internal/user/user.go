@@ -6,7 +6,6 @@ type User struct {
 	ID       uint64 `json:"id" gorm:"primary_key"`
 	Username string `json:"username"`
 	Email    string `json:"email" gorm:"unique_index"`
-	Password string `json:"password"`
 
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
