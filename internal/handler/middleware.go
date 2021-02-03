@@ -31,3 +31,15 @@ func AuthMiddleware(userService user.Service) func(ctx *gin.Context) {
 		ctx.Set(UserIDKey, userID)
 	}
 }
+
+func CorsMiddleware() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		ctx.Header("Access-Control-Allow-Methods", "*")
+		ctx.Header("Access-Control-Allow-Headers", "*")
+
+		if ctx.Request.Method == "OPTIONS" {
+			ctx.AbortWithStatus(http.StatusNoContent)
+		}
+	}
+}

@@ -1,13 +1,16 @@
 package user
 
-import "time"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type User struct {
-	ID       uint64 `json:"id" gorm:"primary_key"`
-	Username string `json:"username"`
-	Email    string `json:"email" gorm:"unique_index"`
+	ID       uint64 `json:"id,omitempty" gorm:"primary_key"`
+	Username string `json:"username,omitempty"`
+	Email    string `json:"email,omitempty" gorm:"unique_index"`
 
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-" sql:"index"`
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
 }

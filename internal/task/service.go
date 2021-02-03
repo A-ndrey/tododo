@@ -1,7 +1,7 @@
 package task
 
 type Service interface {
-	AddNewTask(task Task) error
+	AddNewTask(task Task) (Task, error)
 	GetList(userId uint64, isCompleted bool) ([]Task, error)
 	UpdateTask(task Task) error
 	GetTask(userId, taskId uint64) (Task, error)
@@ -16,7 +16,8 @@ func NewService(repository Repository) Service {
 	return &service{repository}
 }
 
-func (s *service) AddNewTask(task Task) error {
+func (s *service) AddNewTask(task Task) (Task, error) {
+	task.ID = 0
 	return s.repository.Insert(task)
 }
 

@@ -14,9 +14,20 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 func (r *repository) FindByEmail(email string) (User, error) {
-	var user User
+	user := User{Email: email}
 
-	err := r.db.Where(User{Email: email}).First(&user).Error
+	err := r.db.First(&user).Error
+	if err != nil {
+		return User{}, fmt.Errorf("can't find user: %w", err)
+	}
+
+	return user, nil
+}
+
+func (r *repository) FindByID(id uint64) (User, error) {
+	user := User{ID: id}
+
+	err := r.db.First(&user).Error
 	if err != nil {
 		return User{}, fmt.Errorf("can't find user: %w", err)
 	}

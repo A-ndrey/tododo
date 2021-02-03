@@ -33,13 +33,20 @@ func main() {
 
 	r := gin.Default()
 
+	r.Use(handler.CorsMiddleware())
+	r.OPTIONS("/*any")
+
 	api := r.Group("/api/v1")
 
 	api.Use(handler.AuthMiddleware(userService))
 
 	listHandler := &handler.ListHandler{ListService: listService}
 
-	handler.RouteList(api, listHandler)
+	handler.RouteTasks(api, listHandler)
+
+	userHandler := &handler.UserHandler{UserService: userService}
+
+	handler.RouteUser(api, userHandler)
 
 	serverConf := config.GetServer()
 	addr := fmt.Sprintf("%s:%d", serverConf.Host, serverConf.Port)

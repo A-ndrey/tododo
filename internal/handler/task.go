@@ -12,7 +12,7 @@ type ListHandler struct {
 	ListService task.Service
 }
 
-func RouteList(apiGroup *gin.RouterGroup, handler *ListHandler) {
+func RouteTasks(apiGroup *gin.RouterGroup, handler *ListHandler) {
 	listApi := apiGroup.Group("/tasks")
 
 	listApi.GET("/", handler.GetTasks)
@@ -94,9 +94,9 @@ func (h *ListHandler) CreateTask(ctx *gin.Context) {
 		return
 	}
 
-	t.UserId = userId
+	t.UserID = userId
 
-	err := h.ListService.AddNewTask(t)
+	t, err := h.ListService.AddNewTask(t)
 	if err != nil {
 		zap.L().Error("CreateTask",
 			zap.Reflect("task", t),
@@ -106,7 +106,7 @@ func (h *ListHandler) CreateTask(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusCreated)
+	ctx.JSON(http.StatusCreated, t)
 }
 
 func (h *ListHandler) UpdateTask(ctx *gin.Context) {
@@ -126,7 +126,7 @@ func (h *ListHandler) UpdateTask(ctx *gin.Context) {
 		return
 	}
 
-	t.UserId = userId
+	t.UserID = userId
 
 	err := h.ListService.UpdateTask(t)
 	if err != nil {
