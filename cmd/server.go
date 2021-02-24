@@ -7,8 +7,7 @@ import (
 	_ "github.com/A-ndrey/tododo/internal/config"
 	"github.com/A-ndrey/tododo/internal/driver"
 	"github.com/A-ndrey/tododo/internal/handler"
-	"github.com/A-ndrey/tododo/internal/task"
-	"github.com/A-ndrey/tododo/internal/user"
+	"github.com/A-ndrey/tododo/internal/services"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -25,11 +24,9 @@ func main() {
 
 	db := initDB()
 
-	listRepo := task.NewRepository(db)
-	listService := task.NewService(listRepo)
-
-	userRepo := user.NewRepository(db)
-	userService := user.NewService(userRepo)
+	authService := services.NewAuthService()
+	taskService := services.NewTaskService(db)
+	userService := services.NewUserService(db)
 
 	r := gin.Default()
 
@@ -38,9 +35,9 @@ func main() {
 
 	api := r.Group("/api/v1")
 
-	api.Use(handler.AuthMiddleware(userService))
+	api.Use(handler.AuthMiddleware(userService, authService))
 
-	listHandler := &handler.ListHandler{ListService: listService}
+	listHandler := &handler.ListHandler{ListService: taskService}
 
 	handler.RouteTasks(api, listHandler)
 

@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"github.com/A-ndrey/tododo/internal/task"
+	"github.com/A-ndrey/tododo/internal/domains"
+	"github.com/A-ndrey/tododo/internal/services"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 )
 
 type ListHandler struct {
-	ListService task.Service
+	ListService services.TaskService
 }
 
 func RouteTasks(apiGroup *gin.RouterGroup, handler *ListHandler) {
@@ -78,7 +79,7 @@ func (h *ListHandler) GetTask(ctx *gin.Context) {
 }
 
 func (h *ListHandler) CreateTask(ctx *gin.Context) {
-	var t task.Task
+	var t domains.Task
 
 	if err := ctx.BindJSON(&t); err != nil {
 		zap.L().Warn("CreateTask",
@@ -110,7 +111,7 @@ func (h *ListHandler) CreateTask(ctx *gin.Context) {
 }
 
 func (h *ListHandler) UpdateTask(ctx *gin.Context) {
-	var t task.Task
+	var t domains.Task
 
 	if err := ctx.BindJSON(&t); err != nil {
 		zap.L().Warn("UpdateTask",

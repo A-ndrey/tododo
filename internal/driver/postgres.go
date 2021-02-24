@@ -3,8 +3,7 @@ package driver
 import (
 	"fmt"
 	"github.com/A-ndrey/tododo/internal/config"
-	"github.com/A-ndrey/tododo/internal/task"
-	"github.com/A-ndrey/tododo/internal/user"
+	"github.com/A-ndrey/tododo/internal/domains"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -13,8 +12,8 @@ import (
 const schemaName = "tododo"
 
 var entities = []interface{}{
-	&task.Task{},
-	&user.User{},
+	&domains.Task{},
+	&domains.User{},
 }
 
 func NewPostgresGorm() (*gorm.DB, error) {

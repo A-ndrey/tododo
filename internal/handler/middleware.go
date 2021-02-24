@@ -1,19 +1,18 @@
 package handler
 
 import (
-	"github.com/A-ndrey/tododo/internal/auth"
-	"github.com/A-ndrey/tododo/internal/user"
+	"github.com/A-ndrey/tododo/internal/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 const UserIDKey = "userID"
 
-func AuthMiddleware(userService user.Service) func(ctx *gin.Context) {
+func AuthMiddleware(userService services.UserService, authService services.AuthService) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 
-		email, err := auth.GetUserEmail(authHeader)
+		email, err := authService.GetUserEmail(authHeader)
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return

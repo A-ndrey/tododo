@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"github.com/A-ndrey/tododo/internal/user"
+	"github.com/A-ndrey/tododo/internal/domains"
+	"github.com/A-ndrey/tododo/internal/services"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
 )
 
 type UserHandler struct {
-	UserService user.Service
+	UserService services.UserService
 }
 
 func RouteUser(apiGroup *gin.RouterGroup, handler *UserHandler) {
@@ -34,5 +35,5 @@ func (h *UserHandler) getUsername(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user.User{Username: username})
+	ctx.JSON(http.StatusOK, domains.User{Username: username})
 }

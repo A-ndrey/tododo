@@ -1,4 +1,4 @@
-package auth
+package services
 
 import (
 	"encoding/json"
@@ -11,7 +11,18 @@ import (
 
 const apiPath = "/api/v1"
 
-func GetUserEmail(token string) (string, error) {
+type AuthService interface {
+	GetUserEmail(token string) (string, error)
+}
+
+type authService struct {
+}
+
+func NewAuthService() AuthService {
+	return &authService{}
+}
+
+func (s *authService) GetUserEmail(token string) (string, error) {
 	cfg := config.GetAuth()
 	url := fmt.Sprintf("http://%s:%d%s/user?service=%s", cfg.Host, cfg.Port, apiPath, cfg.Service)
 
