@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/A-ndrey/tododo/internal/config"
 	"github.com/A-ndrey/tododo/internal/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,7 +15,16 @@ func AuthMiddleware(userService services.UserService, authService services.AuthS
 
 		email, err := authService.GetUserEmail(authHeader)
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusUnauthorized)
+			authConfig := config.GetAuth()
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, struct {
+				AuthService string `json:"auth_service"`
+				AuthHost    string `json:"auth_host"`
+				AuthPort    uint   `json:"auth_port"`
+			}{
+				AuthService: authConfig.Service,
+				AuthHost:    authConfig.Host,
+				AuthPort:    authConfig.Port,
+			})
 			return
 		}
 
