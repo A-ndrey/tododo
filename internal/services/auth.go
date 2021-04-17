@@ -24,7 +24,11 @@ func NewAuthService() AuthService {
 
 func (s *authService) GetUserEmail(token string) (string, error) {
 	cfg := config.GetAuth()
-	url := fmt.Sprintf("http://%s:%d%s/user?service=%s", cfg.Host, cfg.Port, apiPath, cfg.Service)
+	protocol := "http"
+	if cfg.Port == 443 {
+		protocol = "https"
+	}
+	url := fmt.Sprintf("%s://%s:%d%s/user?service=%s", protocol, cfg.Host, cfg.Port, apiPath, cfg.Service)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
