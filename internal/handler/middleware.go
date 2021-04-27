@@ -17,13 +17,11 @@ func AuthMiddleware(userService services.UserService, authService services.AuthS
 		if err != nil {
 			authConfig := config.GetAuth()
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, struct {
-				AuthService string `json:"auth_service"`
-				AuthHost    string `json:"auth_host"`
-				AuthPort    uint   `json:"auth_port"`
+				AuthService string `json:"authService"`
+				AuthHost    string `json:"authHost"`
 			}{
 				AuthService: authConfig.Service,
 				AuthHost:    authConfig.Host,
-				AuthPort:    authConfig.Port,
 			})
 			return
 		}

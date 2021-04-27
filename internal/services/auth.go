@@ -1,12 +1,15 @@
 package services
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/A-ndrey/tododo/internal/config"
 	"log"
+	"net"
 	"net/http"
+	"time"
 )
 
 const apiPath = "/api/v1"
@@ -24,11 +27,8 @@ func NewAuthService() AuthService {
 
 func (s *authService) GetUserEmail(token string) (string, error) {
 	cfg := config.GetAuth()
-	protocol := "http"
-	if cfg.Port == 443 {
-		protocol = "https"
-	}
-	url := fmt.Sprintf("%s://%s:%d%s/user?service=%s", protocol, cfg.Host, cfg.Port, apiPath, cfg.Service)
+
+	url := fmt.Sprintf("%s%s/user?service=%s", cfg.Host, apiPath, cfg.Service)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -37,7 +37,23 @@ func (s *authService) GetUserEmail(token string) (string, error) {
 
 	req.Header.Set("Authorization", token)
 
-	client := http.Client{}
+	client := http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			ForceAttemptHTTP2:     true,
+			MaxIdleConns:          100,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {

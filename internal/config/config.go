@@ -18,11 +18,9 @@ type Postgres struct {
 type Auth struct {
 	Service string
 	Host    string
-	Port    uint
 }
 
 type Server struct {
-	Host string
 	Port uint
 }
 

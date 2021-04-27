@@ -7,10 +7,10 @@ import (
 
 type Task struct {
 	ID          uint64 `json:"id" gorm:"primary_key"`
-	UserID      uint64 `json:"user_id" gorm:"not null"`
+	UserID      uint64 `json:"userID" gorm:"not null"`
 	Title       string `json:"title" gorm:"not null"`
 	Description string `json:"description"`
-	IsDone      bool   `json:"is_done" gorm:"type:boolean"`
+	IsDone      bool   `json:"isDone" gorm:"type:boolean"`
 	Weight      uint64 `json:"weight"`
 
 	CreatedAt time.Time      `json:"-"`

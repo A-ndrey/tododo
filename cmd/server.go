@@ -46,7 +46,7 @@ func main() {
 	handler.RouteUser(api, userHandler)
 
 	serverConf := config.GetServer()
-	addr := fmt.Sprintf("%s:%d", serverConf.Host, serverConf.Port)
+	addr := fmt.Sprintf(":%d", serverConf.Port)
 
 	srv := &http.Server{
 		Addr:    addr,

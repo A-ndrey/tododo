@@ -8,7 +8,7 @@ import (
 
 type TaskService interface {
 	AddNewTask(task domains.Task) (domains.Task, error)
-	GetList(userId uint64, isCompleted bool) ([]domains.Task, error)
+	GetList(userId uint64) ([]domains.Task, error)
 	UpdateTask(task domains.Task) error
 	GetTask(userId, taskId uint64) (domains.Task, error)
 	DeleteTask(userId, taskId uint64) error
@@ -32,12 +32,12 @@ func (s *taskService) AddNewTask(task domains.Task) (domains.Task, error) {
 	return task, nil
 }
 
-func (s *taskService) GetList(userId uint64, isCompleted bool) ([]domains.Task, error) {
+func (s *taskService) GetList(userId uint64) ([]domains.Task, error) {
 	tasks := make([]domains.Task, 0)
 
-	err := s.db.Find(&tasks, &domains.Task{UserID: userId, IsDone: isCompleted}).Error
+	err := s.db.Find(&tasks, &domains.Task{UserID: userId}).Error
 	if err != nil {
-		return nil, fmt.Errorf("can't find by is done: %w", err)
+		return nil, fmt.Errorf("can't find tasks: %w", err)
 	}
 
 	return tasks, nil
@@ -53,14 +53,14 @@ func (s *taskService) UpdateTask(task domains.Task) error {
 }
 
 func (s *taskService) GetTask(userId, taskId uint64) (domains.Task, error) {
-	var t domains.Task
+	task := domains.Task{}
 
-	err := s.db.Where(&domains.Task{ID: taskId, UserID: userId}).First(&t).Error
+	err := s.db.Take(&task, &domains.Task{ID: taskId, UserID: userId}).Error
 	if err != nil {
 		return domains.Task{}, fmt.Errorf("can't find task: %w", err)
 	}
 
-	return t, nil
+	return task, nil
 }
 
 func (s *taskService) DeleteTask(userId, taskId uint64) error {

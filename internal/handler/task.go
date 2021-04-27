@@ -36,7 +36,7 @@ func (h *ListHandler) GetTasks(ctx *gin.Context) {
 		return
 	}
 
-	actualList, err := h.ListService.GetList(userId, isCompleted)
+	actualList, err := h.ListService.GetList(userId)
 	if err != nil {
 		zap.L().Error("GetTasks",
 			zap.Bool("completed", isCompleted),

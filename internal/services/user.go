@@ -22,9 +22,9 @@ func NewUserService(db *gorm.DB) UserService {
 }
 
 func (s *userService) GetIDByEmail(email string) (uint64, error) {
-	user := domains.User{Email: email}
+	user := domains.User{}
 
-	err := s.db.First(&user).Error
+	err := s.db.Take(&user, domains.User{Email: email}).Error
 	if err != nil {
 		return 0, fmt.Errorf("can't find user: %w", err)
 	}
@@ -33,9 +33,9 @@ func (s *userService) GetIDByEmail(email string) (uint64, error) {
 }
 
 func (s *userService) GetUsernameByID(id uint64) (string, error) {
-	user := domains.User{ID: id}
+	user := domains.User{}
 
-	err := s.db.First(&user).Error
+	err := s.db.Take(&user, id).Error
 	if err != nil {
 		return "", fmt.Errorf("can't find user: %w", err)
 	}
