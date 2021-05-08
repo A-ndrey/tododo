@@ -13,7 +13,7 @@ type Task struct {
 	IsDone      bool   `json:"isDone" gorm:"type:boolean"`
 	Weight      uint64 `json:"weight"`
 
-	CreatedAt time.Time      `json:"-"`
+	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"-"`
 	DeletedAt gorm.DeletedAt `json:"-"`
 }

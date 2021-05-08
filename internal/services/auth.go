@@ -1,15 +1,12 @@
 package services
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/A-ndrey/tododo/internal/config"
 	"log"
-	"net"
 	"net/http"
-	"time"
 )
 
 const apiPath = "/api/v1"
@@ -37,23 +34,7 @@ func (s *authService) GetUserEmail(token string) (string, error) {
 
 	req.Header.Set("Authorization", token)
 
-	client := http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			DialContext: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-			ForceAttemptHTTP2:     true,
-			MaxIdleConns:          100,
-			IdleConnTimeout:       90 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
-	}
+	client := http.Client{}
 
 	resp, err := client.Do(req)
 	if err != nil {
