@@ -6,12 +6,13 @@ import (
 )
 
 type Task struct {
-	ID          uint64 `json:"id" gorm:"primary_key"`
-	UserID      uint64 `json:"userID" gorm:"not null"`
-	Title       string `json:"title" gorm:"not null"`
-	Description string `json:"description"`
-	IsDone      bool   `json:"isDone" gorm:"type:boolean"`
-	Weight      uint64 `json:"weight"`
+	ID          uint64  `json:"id" gorm:"primary_key"`
+	UserID      uint64  `json:"userID" gorm:"not null"`
+	Title       string  `json:"title" gorm:"not null"`
+	Description string  `json:"description"`
+	IsDone      bool    `json:"isDone" gorm:"type:boolean"`
+	Weight      uint64  `json:"weight"`
+	BlockedBy   *uint64 `json:"blockedBy,omitempty"`
 
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"-"`
